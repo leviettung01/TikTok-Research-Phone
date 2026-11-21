@@ -343,7 +343,16 @@ class App:
     # ---- WebSocket ------------------------------------------------------
     def _greet(self, client) -> None:
         self.streams.greet(client)
-        client.send({"type": "device-update", "devices": self.device_list()})
+        cached_devices = self.device_list(max_age=10.0) if self._device_cache else []
+        client.send({"type": "device-update", "devices": cached_devices})
+        if not self._device_cache:
+            def _refresh_devices():
+                try:
+                    devs = self.device_list(max_age=0.0)
+                    self.hub.broadcast({"type": "device-update", "devices": devs})
+                except Exception:
+                    pass
+            threading.Thread(target=_refresh_devices, daemon=True, name="greet-dev-refresh").start()
         client.send({"type": "bluestacks-update", "instances": self.devices.bluestacks_instances()})
         client.send({"type": "wireless-discovered", "services": self._discovered})
         client.send({"type": "auto-capture-state", "enabled": self.auto_capture_clipboard})
@@ -662,7 +671,9 @@ class App:
             self.log(f"[{serial}] Ghi chú auto wakeup: {exc}")
 
     def monitor_loop(self) -> None:
-        while not self.stopping.wait(6.0):
+        first = True
+        while not self.stopping.wait(0.8 if first else 5.0):
+            first = False
             try:
                 self._auto_connect_emulators()
             except Exception:

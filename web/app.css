@@ -2678,6 +2678,10 @@ textarea {
   pointer-events: none;
 }
 
+.drop-overlay button {
+  pointer-events: auto;
+}
+
 .drop-box {
   display: flex;
   flex-direction: column;

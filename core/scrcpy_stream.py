@@ -290,12 +290,13 @@ class ScrcpyStream:
         self.video_sock: socket.socket | None = None
         self.audio_sock: socket.socket | None = None
         self.control_sock: socket.socket | None = None
-        self.control_lock = threading.Lock()
+        self.control_lock = threading.RLock()
         self.parser = PacketParser()
         self.last_clipboard = ""
         self.audio_available = False
         self.running = False
         self.started_at = 0.0
+        self._last_reset_at = 0.0
 
 
     # ---- lifecycle ------------------------------------------------------
@@ -535,13 +536,19 @@ class ScrcpyStream:
 
     def reset_video(self) -> bool:
         """Yêu cầu encoder scrcpy trên điện thoại phát ngay một khung hình khóa (IDR keyframe)."""
-        # Lệnh 17 (0x11) = SC_CONTROL_MSG_TYPE_RESET_VIDEO trong scrcpy 4.1.
-        # Trên Android 7.1 cũ có thể gây NullPointerException nhưng sẽ bị bắt bởi try/except.
         if not self.controllable:
+            return False
+        now = time.time()
+        # Không gửi lệnh 0x11 (RESET_VIDEO) khi encoder chưa phát xong SPS/PPS đầu tiên
+        # hoặc quá sát lúc vừa khởi động (tránh làm scrcpy-server 4.1 trên Android 13 đóng luồng video ngay ở t=0).
+        if not self.parser.config_packet or (now - self.started_at) < 1.5:
+            return False
+        if (now - self._last_reset_at) < 1.5:
             return False
         try:
             with self.control_lock:
-                self.control_sock.sendall(b'\x11')
+                self.control_sock.sendall(b"\x11")
+                self._last_reset_at = now
             return True
         except Exception:
             return False
@@ -603,7 +610,7 @@ class StreamManager:
         self.streams: dict[str, ScrcpyStream] = {}
         self.starting: dict[str, threading.Event] = {}
         self.failures: dict[str, tuple[float, int]] = {}
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
         self.audio_enabled: bool = True
         self.audio_serial: str = ""
         self.pc_player = WinmmWaveOutPlayer()
@@ -697,14 +704,18 @@ class StreamManager:
         return False
 
     def start(self, serial: str) -> dict:
+        already_running = False
         with self.lock:
             if serial in self.streams and self.streams[serial].running:
-                return self.state_message()
-            waiter = self.starting.get(serial)
-            owner = waiter is None
-            if owner:
-                waiter = threading.Event()
-                self.starting[serial] = waiter
+                already_running = True
+            else:
+                waiter = self.starting.get(serial)
+                owner = waiter is None
+                if owner:
+                    waiter = threading.Event()
+                    self.starting[serial] = waiter
+        if already_running:
+            return self.state_message()
         if not owner:
             waiter.wait(15)
             return self.state_message()

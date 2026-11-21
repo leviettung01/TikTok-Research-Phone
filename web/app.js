@@ -105,7 +105,12 @@ let wsRetry = 0;
 function connectWs() {
   ws = new WebSocket(`ws://${location.host}/ws/screen`);
   ws.binaryType = 'arraybuffer';
-  ws.onopen = () => { wsRetry = 0; };
+  ws.onopen = () => {
+    wsRetry = 0;
+    if (state.selected && screen.mode === 'live') {
+      wsSend({ type: 'resync', serial: state.selected });
+    }
+  };
   ws.onclose = () => { setTimeout(connectWs, Math.min(5000, 500 * 2 ** wsRetry++)); };
   ws.onmessage = (event) => {
     if (typeof event.data !== 'string') {
@@ -353,6 +358,12 @@ const screen = {
         this.startingStream = true;
         this.overlay('Đang kết nối màn hình realtime…');
         api('/api/stream/start', { method: 'POST', body: { serial: d.serial } })
+          .then((res) => {
+            if (res?.streams) {
+              state.streams = Object.fromEntries(res.streams.map((s) => [s.serial, s]));
+              this.syncMode();
+            }
+          })
           .catch(() => { })
           .finally(() => { this.startingStream = false; });
       }
@@ -564,8 +575,8 @@ const screen = {
   },
 
   sendTouch(action, pt) {
-    if (!pt) return;
-    wsSend({ type: 'control', serial: state.selected, event: 'touch', action, x: pt.x, y: pt.y, width: pt.width, height: pt.height });
+    if (!pt) return false;
+    return wsSend({ type: 'control', serial: state.selected, event: 'touch', action, x: pt.x, y: pt.y, width: pt.width, height: pt.height });
   },
 
   down(e) {
@@ -602,8 +613,8 @@ const screen = {
     const pt = this.point(e) || pointer;
     const dist = Math.hypot((pt.rx - pointer.rx) * pt.geom.width, (pt.ry - pointer.ry) * pt.geom.height);
     if (this.mode === 'live') {
-      this.sendTouch(e.type === 'pointercancel' ? 'cancel' : 'up', pt);
-      return;
+      const sent = this.sendTouch(e.type === 'pointercancel' ? 'cancel' : 'up', pt);
+      if (sent) return;
     }
     const body = dist < 10
       ? { action: 'tap', x: pt.x, y: pt.y }
@@ -669,6 +680,11 @@ function formatCleanSerial(serial) {
 
 function setDevices(devices) {
   state.devices = devices || [];
+  for (const d of state.devices) {
+    if (d.stream && d.stream.running) {
+      state.streams[d.serial] = d.stream;
+    }
+  }
   const readyDevices = state.devices.filter((d) => d.state === 'device');
   const usbDevice = readyDevices.find((d) => d.kind === 'usb');
   const emuDevice = readyDevices.find((d) => d.kind === 'bluestacks' || d.kind === 'emulator');
@@ -3336,11 +3352,16 @@ window.addEventListener('paste', async (e) => {
 });
 
 /* ------------------------------------------- Boot */
+let loadingDevices = false;
 async function loadDevices() {
+  if (loadingDevices) return;
+  loadingDevices = true;
   try {
     const res = await api('/api/devices');
     if (res?.devices) setDevices(res.devices);
-  } catch { /* ignore */ }
+  } catch { /* ignore */ } finally {
+    loadingDevices = false;
+  }
 }
 
 async function boot() {
@@ -3387,7 +3408,7 @@ async function boot() {
   api('/api/wireless/discover').then((r) => renderLan(r.services)).catch(() => { });
 
   await loadDevices();
-  setInterval(loadDevices, 3000);
+  setInterval(loadDevices, 6000);
   await loadResearch();
 
   state.booted = true;
