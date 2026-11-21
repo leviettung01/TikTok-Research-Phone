@@ -9,10 +9,13 @@ Tool độc lập tách biệt hoàn toàn, chạy trên cổng riêng **`9098`*
 - Không cần cài đặt thêm Android SDK hay scrcpy ngoài.
 
 ### Các bước lấy về máy khác
+**Cách A — Dùng Git:**
 ```powershell
-git clone <LINK_GITHUB_REPO>
-cd TikTok_Research_Phone
+git clone https://github.com/leviettung01/TikTok-Research-Phone.git
+cd TikTok-Research-Phone
 ```
+**Cách B — Tải trực tiếp file ZIP (không cần cài Git):**
+- Tải tại: https://github.com/leviettung01/TikTok-Research-Phone/archive/refs/heads/main.zip rồi giải nén.
 1. *(Tùy chọn)* Chạy **`Cai_Dat_May_Moi.bat`** để tạo môi trường ảo `.venv` sạch sẽ.
 2. Click đúp **`Chay_Tool_Research_Phone.bat`** để mở ứng dụng (lần đầu chạy nếu thiếu thư viện `requests`, `openpyxl`, `qrcode`, `Pillow` tool cũng tự động cài đặt luôn).
 
