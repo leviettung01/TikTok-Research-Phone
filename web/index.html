@@ -1,0 +1,1008 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TikTok Research &amp; Phone Studio — Kết Nối Điện Thoại &amp; AI Research Sản Phẩm</title>
+  <meta name="description"
+    content="Tool độc lập chuyên dụng: Kết nối điện thoại USB/Wi-Fi Realtime, AI Research sản phẩm TikTok Shop (Cách 1 SPAI Auto) và Kéo thả video tự Copy & Paste ID sản phẩm vào điện thoại.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="/app.css?v=research_phone_v3">
+</head>
+
+<body>
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <!-- ==================== TOP HEADER BAR ==================== -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-logo" aria-hidden="true" title="TikTok Research & Phone Studio">
+        <svg viewBox="0 0 24 24">
+          <path
+            d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 1 1-2.59-2.59c.27 0 .53.04.77.12V9.77a5.7 5.7 0 1 0 4.91 5.63V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3a4.3 4.3 0 0 1-3.24-1.48z" />
+        </svg>
+      </div>
+      <div class="brand-text">
+        <div class="brand-title-row">
+          <h1>TikTok Research &amp; Phone Studio</h1>
+          <span class="studio-badge-pro">LITE PRO</span>
+        </div>
+        <div class="brand-sub-row">
+          <span class="brand-sub-label">Bản Độc Lập Tối Ưu</span>
+          <span class="brand-fps-pill">Realtime • Auto Copy/Paste ID</span>
+          <span id="health-line" hidden></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thanh Tab Tối Giản (Chỉ Tab Research Sản Phẩm) -->
+    <nav class="studio-nav-tabs" role="tablist" aria-label="Chế độ làm việc">
+      <button class="studio-tab tab active" data-tab="research" id="tab-research"
+        title="AI Research Sản phẩm Tiềm năng & Tự động bắt link từ điện thoại">
+        <span class="tab-ico">🔍</span>
+        <span>Research Sản Phẩm</span>
+        <span class="tab-pill" id="nav-research-count">0</span>
+      </button>
+    </nav>
+
+    <!-- Cụm Nút Tác Vụ Nhanh Bên Phải Header -->
+    <div class="topbar-actions">
+      <button class="btn studio-btn-emerald sm" id="btn-top-push-video"
+        title="Chọn hoặc kéo thả video nạp vào điện thoại + tự động Copy & Paste ID sản phẩm vào máy">🎬 Nạp Video +
+        Paste ID</button>
+      <button class="btn studio-btn-amber sm" id="btn-wireless" title="Ghép nối điện thoại qua Wi-Fi ADB">➕ Kết nối
+        Wi-Fi</button>
+      <button class="btn studio-btn-cyan sm" id="btn-top-qr" title="Quét mã QR ghép nối nhanh Wi-Fi ADB">📷 Quét
+        QR</button>
+      <button class="btn studio-btn-gold sm" id="btn-top-reload" title="Làm mới danh sách thiết bị & giao diện">⟳
+        Reload</button>
+      <button class="btn ghost sm" id="btn-logs" title="Xem nhật ký hệ thống">🧾 Nhật ký <span class="badge"
+          id="log-badge" hidden>0</span></button>
+      <button class="btn danger ghost sm" id="btn-shutdown" title="Tắt tool an toàn">⏻</button>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN 3-COLUMN LAYOUT ==================== -->
+  <main class="layout" id="main-layout">
+    <!-- CỘT TRÁI: KẾT NỐI VỚI PHONE (USB · WI-FI · QR · BLUESTACKS) -->
+    <aside class="panel devices-panel" id="devices-sidebar">
+      <div class="panel-head sidebar-head">
+        <span class="section-pill emerald">📱 ĐIỆN THOẠI (<span id="device-count">0</span>)</span>
+        <div class="row gap xs" style="flex-shrink:0;">
+          <button type="button" class="btn studio-btn-cyan xs" id="btn-toggle-connect-hub"
+            title="Mở / Đóng bảng công cụ ghép nối điện thoại">➕ Ghép nối ▾</button>
+          <button type="button" class="btn ghost xs sidebar-collapse-btn" id="btn-collapse-sidebar"
+            title="Thu gọn cột danh sách máy để mở rộng không gian làm việc">◀</button>
+        </div>
+      </div>
+
+      <!-- Hộp công cụ kết nối (Tự mở khi chưa có máy kết nối) -->
+      <div class="connect-hub" id="connect-hub-box" hidden>
+        <div class="hub-title-row">
+          <span class="hub-title">⚡ Ghép nối thiết bị</span>
+          <span class="muted" style="font-size:10px; white-space:nowrap;">USB · Wi-Fi · QR</span>
+        </div>
+        <div class="hub-grid">
+          <button type="button" class="hub-btn" id="hub-qr"
+            title="Quét mã QR để nối Wi-Fi ADB (Android 11+)"><span>📷</span><b>Quét mã QR</b></button>
+          <button type="button" class="hub-btn" id="hub-code"
+            title="Nhập mã ghép nối 6 số qua Wi-Fi"><span>🔢</span><b>Nhập mã 6 số</b></button>
+          <button type="button" class="hub-btn" id="hub-usb"
+            title="Chẩn đoán cáp USB và trình điều khiển ADB"><span>🔌</span><b>Kiểm tra USB</b></button>
+          <button type="button" class="hub-btn" id="hub-adb" title="Làm mới kết nối ADB an toàn"><span>🔄</span><b>Reset
+              ADB</b></button>
+        </div>
+        <div class="bs-group" style="margin-top:6px; width:100%;" title="Kết nối giả lập BlueStacks">
+          <select id="bs-select" aria-label="Chọn instance BlueStacks" style="flex:1; min-width:0;">
+            <option value="">BlueStacks…</option>
+          </select>
+          <button type="button" class="btn ghost xs" id="bs-refresh" title="Tải lại danh sách">⟳</button>
+          <button type="button" class="btn ghost xs" id="bs-launch" title="Khởi động BlueStacks">Bật</button>
+          <button type="button" class="btn ghost xs" id="bs-connect" title="Kết nối ADB tới BlueStacks">Nối</button>
+        </div>
+        <div class="lan-list" id="lan-list"></div>
+      </div>
+
+      <!-- Thanh lọc nhanh & Thao tác nhanh dàn máy -->
+      <div class="sidebar-filter-bar">
+        <div class="filter-pills" id="sidebar-filter-pills">
+          <button type="button" class="filter-pill active" data-filter="all">Tất cả</button>
+          <button type="button" class="filter-pill" data-filter="usb">🔌 USB</button>
+          <button type="button" class="filter-pill" data-filter="wireless">📶 Wi-Fi</button>
+          <button type="button" class="filter-pill" data-filter="live">🟢 Live</button>
+        </div>
+        <div class="sidebar-batch-row">
+          <button type="button" class="btn xs ghost" id="btn-sidebar-wake-all" title="Đánh thức & mở khóa tất cả máy">☀
+            Mở khóa hết</button>
+          <button type="button" class="btn xs ghost" id="btn-sidebar-gboard-all"
+            title="Bật lại bàn phím ảo Gboard trên tất cả máy">⌨️ Sửa bàn phím</button>
+        </div>
+      </div>
+
+      <!-- Danh sách thẻ điện thoại -->
+      <div id="device-list" class="device-list"></div>
+
+      <div class="empty-hint" id="device-empty">
+        <div class="empty-icon">📱</div>
+        <p><b>Chưa có điện thoại kết nối.</b> Chọn một cách ở trên:</p>
+        <ol>
+          <li><b>USB:</b> cắm cáp dữ liệu, bật <i>Gỡ lỗi USB</i>, bấm <i>Cho phép</i>. Không hiện → bấm <i>Kiểm tra
+              USB</i>.</li>
+          <li><b>Wi-Fi ADB:</b> bấm <i>Quét mã QR</i> hoặc <i>Nhập mã 6 số</i>.</li>
+          <li><b>BlueStacks:</b> chọn instance → <i>Nối</i>.</li>
+        </ol>
+      </div>
+    </aside>
+
+    <!-- Thanh kéo điều chỉnh độ rộng Cột Trái -->
+    <div class="col-resizer" id="left-resizer" role="separator" aria-orientation="vertical"
+      title="Kéo sang trái/phải để chỉnh độ rộng cột Điện thoại (Nhấp đúp để đặt lại)">
+      <span class="resizer-grip"></span>
+    </div>
+
+    <!-- CỘT GIỮA: TAB RESEARCH SẢN PHẨM (100% TÍNH NĂNG) -->
+    <section class="panel workspace" id="workspace">
+      <div class="studio-banner">
+        <div class="studio-banner-top">
+          <div class="studio-banner-left">
+            <button type="button" class="btn xs studio-btn-emerald" id="btn-expand-sidebar" hidden
+              title="Mở lại cột danh sách Điện thoại bên trái">📱 Máy (<span id="ws-collapsed-dev-count">0</span>)
+              ▶</button>
+            <span class="neon-tag-pink" id="ws-mode-badge">CHỜ KẾT NỐI</span>
+            <h2 id="ws-title" class="studio-ws-title">Chọn một điện thoại</h2>
+            <span class="studio-sub-chip" id="ws-sub">Thiết bị sẵn sàng sẽ tự hiện màn hình realtime bên phải</span>
+          </div>
+          <div class="studio-banner-actions">
+            <button type="button" class="btn xs studio-btn-cyan" id="btn-ws-fix-ime"
+              title="Khôi phục bàn phím ảo Gboard/Samsung trên màn hình điện thoại">⌨️ Bật Bàn Phím Phone</button>
+            <button type="button" class="btn xs studio-btn-purple" id="btn-ws-device-menu"
+              title="Mở menu đầy đủ chức năng của điện thoại đang chọn">☰ Menu Máy ⋯</button>
+          </div>
+        </div>
+        <div class="studio-banner-workflow">
+          <span><b>Quy trình tối ưu:</b> (1) Kết nối Phone ➔ (2) Trên TikTok bấm <b>Chia sẻ → Sao chép liên kết</b> (Tự
+            bắt SP &amp; tải ảnh qua <b>Cách 1 SPAI Auto</b>) ➔ (3) <b>Kéo thả Video</b> vào màn hình Phone bên phải để
+            <b>tự nạp Video + Copy &amp; Paste ID SP</b> thẳng vào điện thoại!</span>
+        </div>
+      </div>
+
+      <!-- TAB RESEARCH SẢN PHẨM -->
+      <div class="tab-body" data-body="research">
+        <div class="card studio-card-pink">
+          <div class="card-head nowrap-bar">
+            <div class="bar-left">
+              <span class="section-pill pink">🔥 SÀN SẢN PHẨM TIỀM NĂNG</span>
+              <h3>AI Research &amp; Tự Động Bắt Link</h3>
+              <button type="button" class="chip ok pulse" id="chip-auto-clip" style="cursor:pointer;"
+                title="Khi BẬT: Bấm 'Sao chép liên kết' trên điện thoại sẽ tự động thêm sản phẩm vào danh sách & tải ảnh Cách 1. Bấm để Bật/Tắt.">📱
+                Tự bắt link: BẬT</button>
+            </div>
+            <div class="bar-right">
+              <button class="btn sm studio-btn-emerald" id="btn-research-add-manual">＋ Thêm SP / Link</button>
+              <button class="btn sm studio-btn-amber" id="btn-research-bulk-paste"
+                title="Dán nhiều link hoặc danh sách ID cùng lúc">📥 Dán danh sách</button>
+              <button class="btn ghost sm" id="btn-research-import-legacy" hidden
+                title="Nhập danh sách sản phẩm & ảnh có sẵn từ Tool cũ sang đây">📂 Nhập từ Tool cũ</button>
+            </div>
+          </div>
+          <div class="sub-toolbar-row">
+            <span class="muted small"
+              style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">💡 Mặc định tải
+              bằng <b>Cách 1 (SPAI Auto)</b> siêu nhanh. Nếu dùng <b>Cách 2 (Browser)</b> bị lỗi vùng quốc gia sẽ <b>tự
+                động chuyển về Cách 1</b>!</span>
+            <div class="bar-right">
+              <button class="btn ghost xs" id="btn-research-open-data-dir-top"
+                title="Mở thư mục lưu trữ toàn bộ ảnh và thông tin sản phẩm trên máy tính">📁 Mở thư mục SP</button>
+              <button class="btn ghost xs" id="btn-research-open-hot-dir-top"
+                style="color: #fb923c; border-color: rgba(251, 146, 60, 0.4);"
+                title="Mở thư mục riêng lưu các sản phẩm HOT trên máy tính">🔥 Thư mục HOT</button>
+              <button class="btn ghost xs" id="btn-research-export" title="Xuất file Excel .xlsx">📊 Xuất Excel</button>
+              <button class="btn ghost xs" id="btn-research-save-now" title="Lưu danh sách sản phẩm">💾 Lưu</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quy trình 10 bước chuẩn thao tác -->
+        <div class="card">
+          <div class="card-head nowrap-bar">
+            <h3>Quy trình 10 Bước AI Research Chuẩn</h3>
+            <div class="bar-right">
+              <span class="muted small">Quan sát trực quan từ màn hình live bên phải</span>
+              <button class="btn ghost xs" id="btn-toggle-steps">Thu gọn</button>
+            </div>
+          </div>
+          <div class="research-steps-grid" id="research-steps-grid"></div>
+        </div>
+
+        <!-- Danh sách sản phẩm nghiên cứu -->
+        <div class="card studio-card-emerald">
+          <div id="research-fetch-progress-bar" class="research-progress-box" hidden
+            style="margin-bottom: 12px; padding: 10px 14px; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.25); border-radius: 8px;">
+            <div class="nowrap-bar" style="width: 100%;">
+              <div class="bar-left">
+                <span class="spinner-sm"
+                  style="display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(59, 130, 246, 0.3); border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite;"></span>
+                <span id="research-progress-text" style="font-weight: 500; font-size: 13px; color: #60a5fa;">Đang tải
+                  thông tin sản phẩm từ Cách 1 (SPAI Auto)...</span>
+              </div>
+              <div class="bar-right">
+                <span id="research-progress-count" class="chip"
+                  style="font-size: 11px; background: rgba(59, 130, 246, 0.2); color: #93c5fd;">0 / 0</span>
+                <button type="button" class="btn ghost xs danger" id="btn-research-stop-batch"
+                  title="Dừng tiến trình tải">✕ Dừng</button>
+              </div>
+            </div>
+            <div
+              style="margin-top: 8px; width: 100%; height: 6px; background: rgba(255, 255, 255, 0.08); border-radius: 3px; overflow: hidden;">
+              <div id="research-progress-fill"
+                style="height: 100%; width: 0%; background: linear-gradient(90deg, #3b82f6, #60a5fa); border-radius: 3px; transition: width 0.3s ease;">
+              </div>
+            </div>
+          </div>
+
+          <div class="card-head nowrap-bar">
+            <div class="bar-left">
+              <span class="section-pill emerald">🟢 KHO SẢN PHẨM</span>
+              <h3>Danh sách (<span id="research-count">0</span>)</h3>
+              <span class="chip" id="research-group-count" style="font-size: 11px;">0 ngày</span>
+              <span class="chip" id="spai-photo-count"
+                style="font-size: 11px; background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3);">🖼️
+                0/0 có ảnh</span>
+              <span class="chip" id="research-hot-count-chip"
+                style="font-size: 11px; background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); cursor: pointer;"
+                title="Bấm để lọc nhanh chỉ sản phẩm HOT">🔥 0 SP HOT</span>
+            </div>
+            <div class="bar-right">
+              <button class="btn primary sm" id="btn-research-fetch-all"
+                title="Cách 1 (Khuyên dùng): Tải trực tiếp từ SPAI Auto tốc độ cao, không mở trình duyệt, không dính lỗi vùng quốc gia">⚡
+                Tải ảnh &amp; mô tả (Cách 1 - SPAI)</button>
+              <button class="btn ghost sm" id="btn-research-fetch-browser"
+                style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);"
+                title="Thử Cách 2 (Browser), nếu TikTok báo lỗi chặn vùng quốc gia (not available in your country) sẽ tự động dùng Cách 1!">🌐
+                Cách 2 (Lỗi tự về Cách 1)</button>
+              <button class="btn ghost sm" id="btn-research-open-data-dir"
+                title="Mở thư mục lưu trữ ảnh và thông tin sản phẩm trên máy tính">📁 Mở thư mục</button>
+              <button class="btn ghost sm" id="btn-research-open-hot-dir"
+                style="color: #fb923c; border-color: rgba(251, 146, 60, 0.4);"
+                title="Mở thư mục riêng lưu các sản phẩm HOT trên máy tính">🔥 Thư mục HOT</button>
+            </div>
+          </div>
+
+          <div class="sub-toolbar-row">
+            <div class="bar-left">
+              <input type="text" id="research-search" placeholder="🔎 Tìm tên hoặc ID…"
+                style="width: 175px; padding: 4px 8px; font-size: 12px;">
+              <select id="research-filter-date" style="padding: 4px 8px; font-size: 12px;">
+                <option value="all">📅 Tất cả ngày</option>
+                <option value="hot">🔥 Chỉ SP HOT</option>
+                <option value="today">📅 Hôm nay</option>
+                <option value="yesterday">📅 Hôm qua</option>
+                <option value="older">📅 Các ngày trước</option>
+              </select>
+            </div>
+            <div class="bar-right">
+              <button class="btn ghost xs" id="btn-research-copy-all-ids"
+                title="Copy toàn bộ ID sản phẩm (mỗi dòng 1 ID)">📋 Copy ID</button>
+              <button class="btn ghost xs" id="btn-research-copy-sel" title="Copy các ID đã chọn">📋 Copy đã
+                chọn</button>
+              <button class="btn ghost xs" id="btn-research-copy-images-sel" title="Copy toàn bộ link ảnh sản phẩm">🖼️
+                Copy link ảnh</button>
+              <button class="btn ghost xs" id="btn-research-copy-full-sel"
+                style="color: #4ade80; border-color: rgba(74, 222, 128, 0.4);"
+                title="Copy toàn bộ thông tin sản phẩm">📋 Copy Full</button>
+              <button class="btn ghost xs" id="btn-research-del-sel" style="color: var(--bad);"
+                title="Chỉ xóa các sản phẩm đang được tick chọn" disabled>🗑 Xóa chọn (0)</button>
+              <button class="btn ghost xs" id="btn-research-restore"
+                title="Khôi phục danh sách từ bản sao lưu gần nhất">⟲ Khôi phục</button>
+              <button class="btn danger ghost xs" id="btn-research-clear" title="Xóa toàn bộ tất cả sản phẩm">⚠️ Xóa
+                hết</button>
+            </div>
+          </div>
+
+          <div class="research-table-wrap">
+            <table class="research-table" id="research-table">
+              <thead>
+                <tr>
+                  <th style="width: 26px;"><input type="checkbox" id="research-select-all" title="Chọn tất cả"></th>
+                  <th style="width: 24px; text-align: center;">#</th>
+                  <th style="width: 36px; text-align: center;" title="Đánh dấu sản phẩm HOT">🔥</th>
+                  <th style="width: 48px; text-align: center;">Ảnh</th>
+                  <th style="min-width: 150px;">Sản phẩm &amp; Cửa hàng</th>
+                  <th style="width: 95px; text-align: right;">Giá &amp; Đã bán</th>
+                  <th style="width: 120px; text-align: center;">ID Sản phẩm</th>
+                  <th style="width: 65px; text-align: center;">Web</th>
+                  <th style="width: 230px; text-align: right;">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="research-tbody"></tbody>
+            </table>
+            <div class="empty-inline" id="research-empty">Chưa có sản phẩm nào. Hãy bấm <i>Sao chép liên kết</i> trên
+              TikTok điện thoại hoặc bấm <b>＋ Thêm SP / Link</b>.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Thanh kéo điều chỉnh độ rộng Khung Màn Hình Điện Thoại -->
+    <div class="col-resizer right-main-resizer" id="right-resizer" role="separator" aria-orientation="vertical"
+      title="Kéo sang trái/phải để điều chỉnh độ rộng Màn hình điện thoại (Nhấp đúp để Mở rộng / Mặc định)">
+      <span class="resizer-grip"></span>
+    </div>
+
+    <!-- CỘT PHẢI: MÀN HÌNH ĐIỆN THOẠI REALTIME + KÉO THẢ VIDEO COPY & PASTE ID -->
+    <section class="panel screen-panel" id="screen-panel">
+      <div class="panel-head screen-panel-head">
+        <div class="screen-head-left">
+          <span class="device-num-badge" id="preview-dev-num">#--</span>
+          <h2 id="preview-dev-title">Màn hình</h2>
+          <span class="chip" id="screen-mode">—</span>
+        </div>
+        <div class="screen-head-controls">
+          <div class="screen-size-ctrl"
+            title="Điều chỉnh độ rộng khung Màn hình điện thoại (hoặc kéo viền trái của khung)">
+            <button type="button" class="size-step-btn" id="btn-screen-narrow"
+              title="Thu hẹp khung màn hình (-40px)">−</button>
+            <input type="range" id="screen-width-slider" min="350" max="780" step="5" value="460"
+              aria-label="Thanh trượt độ rộng khung màn hình">
+            <button type="button" class="size-step-btn" id="btn-screen-wider"
+              title="Mở rộng khung màn hình (+40px)">＋</button>
+            <span class="size-px-badge" id="screen-width-val" title="Nhấp để đặt lại độ rộng chuẩn (460px)">460px</span>
+          </div>
+          <button type="button" class="btn ghost xs" id="btn-phone-fit-mode"
+            title="Chuyển đổi chế độ hiển thị: Vừa trọn khung dọc (không cuộn) / Phóng to đầy chiều ngang khung">↕
+            Khớp</button>
+          <button type="button" class="btn ghost xs" id="btn-toggle-mini-multi"
+            title="Xem lưới thu nhỏ các máy đang kết nối">⊞</button>
+          <button type="button" class="btn ghost xs" id="btn-preview-expand" title="Mở rộng nhanh khung máy Realtime">⤢
+            Rộng</button>
+        </div>
+      </div>
+
+      <!-- Thanh chuyển nhanh máy khi có từ 2 máy trở lên -->
+      <div class="preview-switcher-bar" id="preview-switcher-bar" hidden>
+        <div class="preview-dev-pills" id="preview-dev-pills"></div>
+      </div>
+
+      <!-- Lưới thu nhỏ nhanh các máy -->
+      <div class="mini-multi-grid" id="mini-multi-grid" hidden></div>
+
+      <!-- Màn hình Realtime + Dock điều khiển dọc -->
+      <div class="phone-stage-row" id="single-phone-wrap">
+        <div class="phone-device-col">
+          <div class="phone-wrap">
+            <div class="phone" id="phone" tabindex="0"
+              title="Kéo thả Video vào đây để tự nạp Video + Copy & Paste ID SP vào điện thoại! Bấm rồi gõ phím hoặc Ctrl+V để nhập chữ.">
+              <canvas id="screen-canvas" width="360" height="780"></canvas>
+              <img id="screen-img" alt="Ảnh chụp màn hình thiết bị" hidden>
+              <div class="screen-overlay" id="screen-overlay">
+                <div class="spinner"></div>
+                <p id="screen-msg">Chưa chọn thiết bị</p>
+              </div>
+              <!-- Overlay Kéo thả video vào điện thoại -->
+              <div class="drop-overlay" id="phone-drop-overlay" hidden>
+                <div class="drop-box" style="position:relative;">
+                  <button id="btn-close-drop-overlay" class="btn ghost xs"
+                    style="position:absolute; top:8px; right:8px; font-size:16px; line-height:1; padding:4px 8px; border-radius:50%;"
+                    title="Đóng">✕</button>
+                  <div class="drop-icon">🎬</div>
+                  <div class="drop-title">Thả Video vào Điện Thoại</div>
+                  <div class="drop-sub">Tự động nạp vào Thư viện TikTok · Trích xuất ID SP · Copy &amp; Paste thẳng vào
+                    điện thoại!</div>
+                  <div class="drop-progress" id="phone-drop-progress" hidden>
+                    <div class="drop-track">
+                      <div class="drop-fill" id="phone-drop-bar"></div>
+                    </div>
+                    <span id="phone-drop-pct">Đang nạp 0%…</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Thanh 3 phím điều hướng Android -->
+          <div class="phone-bottom-nav nav-keys">
+            <button type="button" class="nav-pill-btn key" data-key="187" title="Đa nhiệm (Recents)">
+              <span class="nav-ico">▢</span>
+              <small>Đa nhiệm</small>
+            </button>
+            <button type="button" class="nav-pill-btn key nav-home" data-key="3" title="Màn hình chính (Home)">
+              <span class="nav-ico">○</span>
+              <small>Home</small>
+            </button>
+            <button type="button" class="nav-pill-btn key" data-key="4" title="Quay lại (Back)">
+              <span class="nav-ico">◁</span>
+              <small>Quay lại</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- Thanh Dock Chức Năng Dọc Cạnh Máy -->
+        <aside class="phone-side-dock" aria-label="Điều khiển nhanh máy thật">
+          <button type="button" class="side-dock-btn dock-menu-trigger" id="btn-preview-more-menu"
+            title="Mở bảng đầy đủ Chức năng điện thoại">
+            <span class="dock-ico">☰</span>
+            <span class="dock-lbl">Chức năng</span>
+          </button>
+
+          <div class="side-dock-sep"></div>
+
+          <button type="button" class="side-dock-btn dock-emerald" id="btn-push-video"
+            title="Chọn file video từ máy tính nạp thẳng sang điện thoại + Copy & Paste ID SP">
+            <span class="dock-ico">📲</span>
+            <span class="dock-lbl">Nạp Video</span>
+          </button>
+          <input type="file" id="input-push-video" accept="video/mp4,video/quicktime,video/webm,video/*" multiple
+            hidden>
+
+          <button type="button" class="side-dock-btn dock-pink" id="btn-open-tiktok"
+            title="Mở nhanh ứng dụng TikTok trên máy">
+            <span class="dock-ico">🎵</span>
+            <span class="dock-lbl">Mở TikTok</span>
+          </button>
+
+          <button type="button" class="side-dock-btn" id="btn-stop-tiktok"
+            title="Buộc dừng / Khởi động lại ứng dụng TikTok">
+            <span class="dock-ico">⏹</span>
+            <span class="dock-lbl">Dừng TT</span>
+          </button>
+
+          <div class="side-dock-sep"></div>
+
+          <button type="button" class="side-dock-btn dock-emerald" id="btn-side-paste"
+            title="Dán nhanh văn bản / ID đang copy trên máy tính vào điện thoại (Ctrl+V)">
+            <span class="dock-ico">📋</span>
+            <span class="dock-lbl">Dán chữ</span>
+          </button>
+
+          <button type="button" class="side-dock-btn dock-amber" id="btn-quick-ime-fix"
+            title="Bật lại bàn phím ảo Gboard để gõ trực tiếp trên màn hình điện thoại">
+            <span class="dock-ico">⌨️</span>
+            <span class="dock-lbl">Bàn phím</span>
+          </button>
+
+          <button type="button" class="side-dock-btn key" data-key="224" title="Đánh thức &amp; Mở khóa màn hình">
+            <span class="dock-ico">☀</span>
+            <span class="dock-lbl">Mở khóa</span>
+          </button>
+
+          <div class="side-dock-pair" title="Tăng / Giảm âm lượng trên điện thoại">
+            <button type="button" class="side-dock-half key" data-key="24" title="Tăng âm lượng">🔊+</button>
+            <button type="button" class="side-dock-half key" data-key="25" title="Giảm âm lượng">🔉-</button>
+          </div>
+
+          <button type="button" class="side-dock-btn" id="btn-side-screenshot"
+            title="Chụp ảnh màn hình điện thoại &amp; tải về máy tính">
+            <span class="dock-ico">📸</span>
+            <span class="dock-lbl">Chụp ảnh</span>
+          </button>
+
+          <button type="button" class="side-dock-btn" id="btn-fullscreen" title="Phóng to toàn màn hình">
+            <span class="dock-ico">⛶</span>
+            <span class="dock-lbl">Phóng to</span>
+          </button>
+
+          <button type="button" class="side-dock-btn" id="btn-stream-toggle" title="Bật / Dừng truyền hình trực tiếp">
+            <span class="dock-ico">🔄</span>
+            <span class="dock-lbl">Stream</span>
+          </button>
+        </aside>
+      </div>
+
+      <!-- Thanh Kéo Thả Video + Trạng Thái Copy & Paste ID Sản Phẩm -->
+      <div class="phone-product-strip" id="phone-product-strip">
+        <div class="phone-product-info">
+          <span class="product-badge">📦 ID SP:</span>
+          <code id="phone-product-id" class="product-code"
+            title="Kéo thả video có chứa ID sản phẩm vào màn hình để tự động lấy ID & Paste vào điện thoại">Chưa có ID (Thả video)</code>
+        </div>
+        <div class="phone-product-actions">
+          <label class="auto-paste-pill"
+            title="Khi bật: Kéo thả video vào máy sẽ vừa Copy vừa Paste thẳng ID sản phẩm vào ô đang mở trên điện thoại!">
+            <input type="checkbox" id="chk-auto-paste-id" checked>
+            <span>Tự Paste</span>
+          </label>
+          <button type="button" class="btn xs" id="btn-copy-product-id"
+            title="Copy lại ID vào Clipboard điện thoại &amp; máy tính">📋 Copy</button>
+          <button type="button" class="btn xs primary" id="btn-paste-product-id"
+            title="Paste trực tiếp ID sản phẩm này vào ô đang chọn trên điện thoại">✍️ Paste Phone</button>
+        </div>
+      </div>
+
+      <!-- Ô nhập văn bản gửi vào điện thoại + Dán nhanh + Cụm từ nhanh -->
+      <form class="send-text" id="send-text">
+        <input id="send-text-input" placeholder="⌨️ Gõ chữ hoặc nhấn Ctrl+V để dán thẳng vào máy (hỗ trợ tiếng Việt)…"
+          autocomplete="off">
+        <button type="button" class="btn xs ghost" id="btn-paste-pc-clip"
+          title="Dán ngay văn bản trong Clipboard máy tính vào điện thoại (Ctrl+V)">📋 Dán</button>
+        <button type="button" class="btn xs ghost" id="btn-phone-backspace"
+          title="Xoá lùi 1 ký tự trên điện thoại (Giữ Shift + Bấm để xoá sạch ô chữ)">⌫</button>
+        <button type="button" class="btn xs ghost" id="btn-quick-phrases"
+          title="Chọn cụm từ nhanh (Mua ở đây, Hashtag...)">💬</button>
+        <button type="submit" class="btn sm studio-btn-emerald">Gửi</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- ==================== BOTTOM STATUS BAR ==================== -->
+  <footer class="studio-statusbar">
+    <div class="statusbar-left">
+      <span class="status-item"><span class="status-dot ok" id="sb-adb-dot"></span><b>ADB Bridge</b></span>
+      <span class="status-sep">·</span>
+      <span class="status-item">📱 Máy kết nối: <b id="sb-dev-count" class="text-emerald">0/0</b></span>
+      <span class="status-sep">·</span>
+      <span class="status-item">⌨️ Bàn phím: <b id="sb-ime-state" class="text-cyan">Gboard Chuẩn</b></span>
+      <span class="status-sep">·</span>
+      <span class="status-item">⚡ Chế độ tải SP: <b class="text-emerald">Cách 1 (SPAI Auto)</b></span>
+    </div>
+    <div class="statusbar-right">
+      <span class="status-item">📦 Kho SP Research: <b id="sb-research-count" class="text-amber">0</b></span>
+      <span class="status-sep">·</span>
+      <span class="status-item">🔥 SP HOT: <b id="sb-hot-count" class="text-pink">0</b></span>
+      <span class="status-sep">·</span>
+      <span class="status-item muted small">Port <b id="sb-port">9098</b> (Độc lập)</span>
+    </div>
+  </footer>
+
+  <!-- ==================== POPUP MENU CHỨC NĂNG ĐIỆN THOẠI ==================== -->
+  <div class="device-context-menu" id="device-context-menu" hidden>
+    <div class="dcm-head">
+      <div class="row gap center">
+        <span class="dcm-num" id="dcm-num">01</span>
+        <div>
+          <div class="dcm-title" id="dcm-title">Thiết bị</div>
+          <div class="dcm-sub" id="dcm-sub">Chức năng điện thoại</div>
+        </div>
+      </div>
+      <button type="button" class="btn ghost xs" id="dcm-close" title="Đóng menu">✕</button>
+    </div>
+
+    <div class="dcm-body">
+      <div class="dcm-group-label">Màn hình &amp; Định danh</div>
+      <button type="button" class="dcm-item" data-dcm="large_screen"><i>🔍</i><span>Mở màn hình lớn
+          (Rộng)</span></button>
+      <button type="button" class="dcm-item" data-dcm="change_number"><i>#️⃣</i><span>Thay đổi số hiệu (01, 02,
+          03…)</span></button>
+      <button type="button" class="dcm-item" data-dcm="rename"><i>✏️</i><span>Đổi tên hiển thị</span></button>
+      <button type="button" class="dcm-item" data-dcm="change_tag"><i>🏷️</i><span>Thêm vào thẻ / Nhóm
+          máy</span></button>
+      <button type="button" class="dcm-item" data-dcm="toggle_video_mode"><i>🎞️</i><span>Đổi chế độ Stream (Mượt /
+          Tương thích)</span></button>
+
+      <div class="dcm-group-label">Video &amp; Văn bản</div>
+      <button type="button" class="dcm-item highlight-cyan" data-dcm="push_video"><i>🎬</i><span>Nạp Video + Copy &amp;
+          Paste ID SP</span></button>
+      <button type="button" class="dcm-item" data-dcm="send_text"><i>📤</i><span>Nhập &amp; Gửi văn bản vào
+          máy</span></button>
+      <button type="button" class="dcm-item" data-dcm="quick_phrases"><i>💬</i><span>Cụm từ nhanh (Mua ở
+          đây...)</span></button>
+      <button type="button" class="dcm-item" data-dcm="save_screenshot"><i>📸</i><span>Xuất ảnh chụp màn hình về
+          PC</span></button>
+      <button type="button" class="dcm-item" data-dcm="export_clipboard"><i>📋</i><span>Xuất bảng nhớ
+          (Clipboard)</span></button>
+
+      <div class="dcm-group-label">Bàn phím &amp; TikTok</div>
+      <button type="button" class="dcm-item highlight-cyan" data-dcm="ime_normal"><i>⌨️</i><span>Bật bàn phím ảo (Sửa
+          mất bàn phím)</span></button>
+      <button type="button" class="dcm-item" data-dcm="ime_adb"><i>🤖</i><span>Chuyển sang ADB Keyboard
+          (Ngầm)</span></button>
+      <button type="button" class="dcm-item" data-dcm="open_tiktok"><i>🎵</i><span>Mở nhanh ứng dụng
+          TikTok</span></button>
+      <button type="button" class="dcm-item" data-dcm="stop_tiktok"><i>⏹</i><span>Buộc dừng ứng dụng
+          TikTok</span></button>
+
+      <div class="dcm-group-label">Lệnh ADB &amp; Kết nối</div>
+      <button type="button" class="dcm-item" data-dcm="adb_settings"><i>⚙️</i><span>Mở Cài đặt Android trên
+          máy</span></button>
+      <button type="button" class="dcm-item" data-dcm="adb_wifi"><i>📶</i><span>Mở Cài đặt Wi-Fi trên
+          máy</span></button>
+      <button type="button" class="dcm-item" data-dcm="adb_ime_settings"><i>🔤</i><span>Mở Cài đặt Ngôn ngữ &amp; Bàn
+          phím</span></button>
+      <button type="button" class="dcm-item" data-dcm="switch_tcpip"><i>🔌</i><span>Chuyển sang chế độ Wi-Fi ADB
+          (5555)</span></button>
+      <button type="button" class="dcm-item" data-dcm="reconnect"><i>🔄</i><span>Kết nối lại Stream &amp; Đánh thức
+          máy</span></button>
+      <button type="button" class="dcm-item danger" data-dcm="disconnect_device"><i>🗑️</i><span>Ngắt kết nối thiết bị
+          mạng</span></button>
+    </div>
+
+    <div class="dcm-footer-nav">
+      <button type="button" class="dcm-nav-btn" data-dcm-key="187" title="Đa nhiệm (Recents)">▢</button>
+      <button type="button" class="dcm-nav-btn" data-dcm-key="3" title="Màn hình chính (Home)">○</button>
+      <button type="button" class="dcm-nav-btn" data-dcm-key="4" title="Quay lại (Back)">◁</button>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL CỤM TỪ NHANH ==================== -->
+  <dialog id="dlg-quick-phrases" class="dialog">
+    <form method="dialog" class="dialog-body">
+      <div class="row between center" style="margin-bottom:10px;">
+        <h2>💬 Cụm từ nhanh &amp; Dán văn bản</h2>
+        <button type="button" class="btn ghost xs" id="btn-qp-close">✕</button>
+      </div>
+      <p class="muted small">Bấm vào cụm từ mẫu để dán ngay vào ô đang chọn trên điện thoại:</p>
+      <div class="phrases-list" id="phrases-list" style="display:flex; flex-direction:column; gap:6px; margin:10px 0;">
+        <button type="button" class="btn ghost sm phrase-item" data-phrase="Mua ở đây"
+          style="justify-content:space-between;"><span>🛒 <b>Mua ở đây</b> (Tên liên kết Affiliate chuẩn)</span><span
+            class="chip ok">Dán ngay</span></button>
+        <button type="button" class="btn ghost sm phrase-item"
+          data-phrase="Săn deal giá hời tại giỏ hàng góc trái màn hình nhé! #xuhuong #tiktokshop #review"
+          style="justify-content:space-between;"><span>🔥 Caption xu hướng + Hashtag chuẩn</span><span
+            class="chip ok">Dán ngay</span></button>
+        <button type="button" class="btn ghost sm phrase-item"
+          data-phrase="Hàng chính hãng đang sale đậm, bấm vào giỏ hàng màu vàng góc trái nhé!"
+          style="justify-content:space-between;"><span>✨ Kêu gọi bấm giỏ hàng vàng</span><span class="chip ok">Dán
+            ngay</span></button>
+      </div>
+      <label class="field" style="margin-top:12px;">
+        <span>Hoặc nhập nội dung văn bản tùy ý:</span>
+        <textarea id="custom-broadcast-text" rows="3"
+          placeholder="Nhập văn bản tiếng Việt có dấu cần dán vào máy..."></textarea>
+      </label>
+      <div class="row gap end" style="margin-top:12px;">
+        <button type="button" class="btn ghost sm" id="btn-qp-cancel">Đóng</button>
+        <button type="button" class="btn studio-btn-cyan sm" id="btn-send-text-one">📲 Dán vào máy đang chọn</button>
+        <button type="button" class="btn primary sm" id="btn-send-text-all">🚀 Gửi tất cả máy</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Nhật ký -->
+  <aside class="drawer" id="log-drawer" hidden>
+    <div class="drawer-head">
+      <h2>🧾 Nhật ký hệ thống</h2>
+      <div class="row gap"><button class="btn ghost xs" id="log-clear">Xoá hiển thị</button><button class="btn ghost xs"
+          id="log-close">✕</button></div>
+    </div>
+    <div class="log-list" id="log-list"></div>
+  </aside>
+
+  <!-- Wi-Fi ADB -->
+  <dialog id="dlg-wireless" class="dialog">
+    <form method="dialog" class="dialog-body">
+      <div class="row between center" style="margin-bottom:8px; gap:8px;">
+        <h2 style="margin:0;">Kết nối Wi-Fi ADB</h2>
+        <button type="button" class="btn sm studio-btn-cyan" id="w-open-qr"
+          title="Mở mã QR nền trắng độ tương phản cao để quét nhanh">📷 Quét mã QR</button>
+      </div>
+      <ol class="steps small">
+        <li>Điện thoại và máy tính cùng một mạng Wi-Fi / LAN.</li>
+        <li>Trên điện thoại: <b>Cài đặt → Tùy chọn nhà phát triển → Gỡ lỗi không dây</b> → BẬT.</li>
+        <li>Nếu chưa ghép nối: bấm <b>📷 Quét mã QR</b> ở trên hoặc <b>Ghép nối bằng mã 6 số</b> bên dưới.</li>
+      </ol>
+      <div class="lan-modal-box">
+        <div class="lan-head">
+          <span class="small" style="font-weight:600; color:#7dd3fc;">📶 Máy đang bật Gỡ lỗi không dây trong mạng
+            LAN</span>
+          <button type="button" class="btn xs ghost" id="w-scan-lan" title="Quét mDNS và dải cổng Wi-Fi trong LAN">🔄
+            Quét LAN ngay</button>
+        </div>
+        <div class="lan-list" id="w-lan-list">
+          <div class="small muted">Bấm “Quét LAN ngay” để tìm máy đang bật Wi-Fi ADB…</div>
+        </div>
+      </div>
+      <fieldset>
+        <legend>Ghép nối bằng mã 6 số (trong hộp thoại “Ghép nối với thiết bị”)</legend>
+        <div class="row gap"><input id="w-pair-addr" placeholder="IP:port ghép nối (vd 192.168.1.18:42763)"><input
+            id="w-pair-code" placeholder="Mã 6 số" maxlength="6" class="w-code" inputmode="numeric"></div>
+        <legend class="sub">Mục “Địa chỉ IP và cổng” (có thể chỉ nhập IP — tool tự dò cổng)</legend>
+        <input id="w-conn-addr" placeholder="IP hoặc IP:port gỡ lỗi (vd 192.168.1.18 hoặc 192.168.1.18:38357)"
+          style="width:100%">
+        <div class="row gap" style="margin-top:6px; flex-wrap:wrap;">
+          <button type="button" class="btn sm primary" id="w-pair">Ghép nối &amp; kết nối</button>
+          <button type="button" class="btn sm" id="w-connect">Kết nối IP:port</button>
+          <button type="button" class="btn sm" id="w-auto-find"
+            title="Tool tự quét mDNS và dải cổng để tìm cổng Gỡ lỗi không dây đang mở trên điện thoại">🔍 Tự dò cổng
+            &amp;
+            kết nối</button>
+        </div>
+      </fieldset>
+      <p class="small" id="w-result"></p>
+      <div class="row end"><button class="btn ghost">Đóng</button></div>
+    </form>
+  </dialog>
+
+  <!-- Ghép nối QR -->
+  <dialog id="dlg-qr" class="dialog">
+    <form method="dialog" class="dialog-body">
+      <h2>Ghép nối Wi-Fi bằng mã QR</h2>
+      <div class="qr-wrap">
+        <div class="qr-box" id="qr-box">
+          <div class="spinner"></div>
+        </div>
+        <ol class="steps small">
+          <li>Điện thoại cùng mạng Wi-Fi/LAN với máy tính.</li>
+          <li>Vào <b>Tùy chọn nhà phát triển → Gỡ lỗi không dây</b> (bật).</li>
+          <li>Bấm <b>Ghép nối thiết bị bằng mã QR</b>.</li>
+          <li>Đưa camera vào mã nền trắng bên cạnh. Tool tự ghép nối và kết nối ngay.</li>
+        </ol>
+      </div>
+      <div class="qr-status" id="qr-status">Đang tạo mã…</div>
+
+      <div id="qr-manual-fallback" class="qr-fallback"
+        style="display:none; margin-top:12px; padding:12px; background:var(--card-bg, #1a1e26); border-radius:8px; border:1px solid var(--border, #333842);">
+        <div class="small" style="margin-bottom:8px; color:var(--text, #ddd);">
+          💡 Đã quét xong mã QR! Nếu máy chưa tự nhận, nhập cổng 5 số ở mục <b>Địa chỉ IP và cổng</b> trên điện thoại để
+          nối ngay:
+        </div>
+        <div class="row gap">
+          <input id="qr-direct-ip" placeholder="IP điện thoại (vd 192.168.1.18)" style="flex:2">
+          <input id="qr-direct-port" placeholder="Cổng 5 số (vd 38357)" maxlength="5" style="flex:1"
+            inputmode="numeric">
+          <button type="button" class="btn sm primary" id="qr-direct-connect">Kết nối ngay</button>
+        </div>
+        <div id="qr-direct-msg" class="small" style="margin-top:6px;"></div>
+      </div>
+
+      <div class="row end gap" style="margin-top:10px"><button type="button" class="btn ghost sm" id="qr-renew">Tạo mã
+          mới</button><button class="btn ghost" id="qr-close">Đóng</button></div>
+    </form>
+  </dialog>
+
+  <!-- Chẩn đoán USB -->
+  <dialog id="dlg-usb" class="dialog">
+    <form method="dialog" class="dialog-body">
+      <h2>Kiểm tra kết nối USB</h2>
+      <div id="usb-result">
+        <div class="spinner"></div>
+      </div>
+      <details class="small muted">
+        <summary>Hướng dẫn bật Gỡ lỗi USB cho Xiaomi / Redmi / Samsung</summary>
+        <ol class="steps">
+          <li>Cài đặt → Giới thiệu điện thoại → chạm 7 lần vào <b>Phiên bản MIUI/HyperOS</b> (hoặc <b>Số hiệu bản
+              tạo</b> trên Samsung).</li>
+          <li>Cài đặt → Tùy chọn nhà phát triển: bật <b>Gỡ lỗi USB</b>, <b>Cài đặt qua USB</b>, <b>Gỡ lỗi USB (Cài đặt
+              bảo mật)</b>.</li>
+          <li>Cắm <b>cáp dữ liệu</b> → màn hình máy hiện “Cho phép gỡ lỗi USB?” → tick <i>Luôn cho phép</i> → OK.</li>
+        </ol>
+      </details>
+      <div class="row end gap"><button type="button" class="btn ghost sm" id="usb-again">Kiểm tra lại</button><button
+          class="btn ghost">Đóng</button></div>
+    </form>
+  </dialog>
+
+  <!-- Modal Thêm sản phẩm Research -->
+  <dialog id="dlg-research-add" class="dialog">
+    <form method="dialog" class="dialog-body" id="form-research-add">
+      <h2>Thêm Sản phẩm Nghiên cứu</h2>
+      <p class="muted small">Dán link chia sẻ từ TikTok hoặc tự nhập ID/tên sản phẩm để lưu trữ &amp; tải ảnh Cách 1.
+      </p>
+      <label class="field">
+        <div class="row between" style="margin-bottom: 4px;">
+          <span>Link chia sẻ sản phẩm (Share URL)</span>
+          <button type="button" class="btn ghost xs" id="btn-paste-phone-single"
+            title="Lấy link vừa copy từ điện thoại">📋 Dán từ Phone</button>
+        </div>
+        <input type="text" id="r-add-url" placeholder="https://vt.tiktok.com/... hoặc link TikTok Shop">
+      </label>
+      <div class="grid-2">
+        <label class="field"><span>Tên sản phẩm</span>
+          <input type="text" id="r-add-title" placeholder="VD: Khăn giấy rút 4 lớp">
+        </label>
+        <label class="field"><span>ID Sản phẩm (tùy chọn)</span>
+          <input type="text" id="r-add-id" placeholder="Tự trích xuất nếu để trống">
+        </label>
+      </div>
+      <div class="grid-2">
+        <label class="field"><span>Ngành hàng / Phân loại (tùy chọn)</span>
+          <input type="text" id="r-add-cat" placeholder="VD: Đồ ăn vặt, Gia dụng...">
+        </label>
+        <label class="field"><span>Ghi chú</span>
+          <input type="text" id="r-add-notes" placeholder="VD: Mẫu hot tuần này">
+        </label>
+      </div>
+      <div class="row end gap" style="margin-top: 10px;">
+        <button type="button" class="btn ghost" id="r-add-cancel">Huỷ</button>
+        <button type="submit" class="btn primary" id="r-add-submit">💾 Lưu sản phẩm</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal Dán danh sách hàng loạt (Bulk Paste) -->
+  <dialog id="dlg-research-bulk" class="dialog">
+    <form method="dialog" class="dialog-body" id="form-research-bulk">
+      <div class="row between">
+        <h2>📥 Dán danh sách Link / ID sản phẩm</h2>
+        <button type="button" class="btn ghost xs" id="btn-paste-phone-bulk"
+          title="Chèn link vừa copy trên điện thoại vào đây">📋 Lấy link từ Phone</button>
+      </div>
+      <p class="muted small">Dán nhiều link chia sẻ từ TikTok, TikTok Shop hoặc danh sách ID sản phẩm (mỗi dòng một link
+        hoặc ID):</p>
+
+      <label class="field" style="margin: 10px 0;">
+        <textarea id="bulk-paste-text" rows="10" placeholder="VD:
+https://vt.tiktok.com/ZSjX12345/
+https://vt.tiktok.com/ZSjY67890/
+1729482910482910" style="width: 100%; box-sizing: border-box;"></textarea>
+      </label>
+      <div class="row between" style="margin-top: 10px;">
+        <span class="muted small" id="bulk-paste-hint">Hỗ trợ link vt.tiktok.com, shop.tiktok.com và ID 15–20 số.</span>
+        <div class="row gap">
+          <button type="button" class="btn ghost" id="bulk-paste-cancel">Huỷ</button>
+          <button type="submit" class="btn primary" id="bulk-paste-submit">⚡ Thêm tất cả &amp; tải ảnh Cách 1</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal Xác nhận Cảnh báo Xóa tất cả sản phẩm -->
+  <dialog id="dlg-research-confirm-clear" class="dialog">
+    <form method="dialog" class="dialog-body" id="form-research-confirm-clear" style="max-width: 480px;">
+      <div class="row gap" style="align-items: center; color: var(--bad); margin-bottom: 8px;">
+        <span style="font-size: 24px;">⚠️</span>
+        <h3 style="margin: 0; color: var(--bad);">CẢNH BÁO: XÓA TOÀN BỘ DANH SÁCH</h3>
+      </div>
+      <p style="margin: 10px 0 6px 0; font-size: 14px; line-height: 1.5;">
+        Bạn đang yêu cầu xóa sạch toàn bộ <b id="clear-modal-total" style="color: var(--bad); font-size: 16px;">0</b>
+        sản phẩm trong bảng nghiên cứu.
+      </p>
+      <div
+        style="background: rgba(239, 68, 68, 0.08); border-left: 3px solid var(--bad); padding: 10px 12px; border-radius: 4px; margin: 12px 0; font-size: 13px; line-height: 1.5;">
+        <div style="font-weight: 600; margin-bottom: 4px; color: var(--bad);">⛔ Chú ý:</div>
+        <div>• Thao tác này sẽ xóa toàn bộ sản phẩm hiện tại trong danh sách!</div>
+        <div style="margin-top: 8px; color: var(--muted); font-size: 12px;">🛡️ <i>Hệ thống luôn tự động lưu 1 bản sao
+            lưu trước khi xóa. Bạn có thể bấm nút "⟲ Khôi phục" bất cứ lúc nào.</i></div>
+      </div>
+      <div class="row end gap" style="margin-top: 16px;">
+        <button type="button" class="btn ghost" id="btn-cancel-clear">Huỷ bỏ (Giữ lại)</button>
+        <button type="button" class="btn danger" id="btn-confirm-execute-clear">⚠️ Tôi hiểu, xóa sạch tất cả</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Modal Chi tiết Sản phẩm & Toàn bộ Ảnh / Mô tả -->
+  <dialog id="dlg-product-detail" class="dialog prod-detail-dialog">
+    <form method="dialog" class="dialog-body prod-detail-modal" id="form-product-detail"
+      style="max-width: 940px; width: 94vw; max-height: 90vh; overflow-y: auto;">
+      <div class="row gap wrap"
+        style="justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 14px;">
+        <div style="flex: 1; min-width: 260px;">
+          <div class="row gap center" style="margin-bottom: 6px; flex-wrap: wrap;">
+            <span class="chip ok" id="pdetail-shop">🏪 Đang tải...</span>
+            <span class="chip" id="pdetail-cat" style="font-size: 11px;">🏷️ Danh mục</span>
+            <span class="chip" id="pdetail-status" style="font-size: 11px;">Tiềm năng</span>
+            <button type="button" class="btn ghost sm" id="btn-pdetail-toggle-hot"
+              style="padding: 2px 10px; font-size: 11px; border-radius: 20px;"
+              title="Đánh dấu / Bỏ đánh dấu sản phẩm HOT">🔥 Đánh dấu HOT</button>
+            <button type="button" class="btn primary sm" id="btn-pdetail-copy-full"
+              style="padding: 2px 10px; font-size: 11px; border-radius: 20px; background: linear-gradient(135deg, #10b981, #059669); border: none; color: #fff;">📋
+              Copy Full thông tin SP</button>
+          </div>
+          <h3 id="pdetail-title" style="margin: 4px 0 0 0; font-size: 15.5px; line-height: 1.4; color: var(--text);">Tên
+            sản phẩm</h3>
+        </div>
+        <button type="button" class="btn ghost xs" id="btn-close-product-detail"
+          style="font-size: 18px; padding: 4px 10px;">✕</button>
+      </div>
+
+      <div class="prod-detail-grid">
+        <div class="prod-gallery-col">
+          <div class="prod-main-img-box">
+            <img id="pdetail-main-img" src="" alt="Ảnh sản phẩm" class="prod-main-img">
+            <div id="pdetail-img-counter" class="prod-img-counter">1 / 1</div>
+          </div>
+          <div class="prod-thumbs-strip" id="pdetail-thumbs-strip"></div>
+          <div class="row gap wrap center" style="margin-top: 10px;">
+            <a id="pdetail-link-orig-img" href="#" target="_blank" rel="noopener noreferrer" class="btn ghost xs">🔗 Mở
+              ảnh gốc</a>
+            <button type="button" class="btn ghost xs" id="btn-pdetail-copy-images">📋 Copy link ảnh</button>
+            <button type="button" class="btn ghost xs" id="btn-pdetail-open-folder">📁 Mở thư mục máy tính</button>
+            <button type="button" class="btn primary xs" id="btn-pdetail-refresh-data">⚡ Tải lại (Cách 1 -
+              SPAI)</button>
+            <button type="button" class="btn ghost xs" id="btn-pdetail-refresh-browser"
+              style="color: #38bdf8; border-color: rgba(56, 189, 248, 0.4);">🌐 Cách 2 (Lỗi tự về Cách 1)</button>
+          </div>
+
+          <div class="pdetail-folder-box" id="pdetail-folder-box"
+            style="margin-top: 12px; padding: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--line); border-radius: 8px; font-size: 11.5px;">
+            <div class="row gap center" style="justify-content: space-between; margin-bottom: 6px;">
+              <span style="font-weight: 600; color: #a5d6a7; display: flex; align-items: center; gap: 5px;">
+                📁 <span id="pdetail-folder-label">Thư mục trên máy tính</span>
+              </span>
+              <div class="row gap center">
+                <button type="button" class="btn ghost xs" id="btn-pdetail-copy-folder-path"
+                  style="padding: 2px 7px; font-size: 10.5px;">📋 Copy Path</button>
+                <button type="button" class="btn primary xs" id="btn-pdetail-open-folder-action"
+                  style="padding: 2px 7px; font-size: 10.5px;">📂 Bật File Explorer</button>
+              </div>
+            </div>
+            <div id="pdetail-folder-path"
+              style="font-family: monospace; font-size: 11px; word-break: break-all; color: var(--muted); margin-bottom: 8px; user-select: all; padding: 3px 6px; background: rgba(255,255,255,0.03); border-radius: 4px;">
+            </div>
+            <div style="font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 5px;">Các tệp tin trong
+              thư mục:</div>
+            <div id="pdetail-folder-files" class="row gap wrap" style="font-size: 11px; gap: 4px;">
+              <span class="chip" style="font-size: 10.5px; opacity: 0.7;">Đang tải danh sách tệp...</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-info-col">
+          <div class="prod-stat-cards">
+            <div class="prod-stat-card">
+              <div class="stat-label">💰 GIÁ BÁN</div>
+              <div class="stat-val primary-text" id="pdetail-price">0 ₫</div>
+              <div class="stat-sub" id="pdetail-orig-price" style="text-decoration: line-through; display: none;">0 ₫
+              </div>
+            </div>
+            <div class="prod-stat-card">
+              <div class="stat-label">🔥 ĐÃ BÁN</div>
+              <div class="stat-val" id="pdetail-sold">0</div>
+              <div class="stat-sub">Đơn hàng TikTok Shop</div>
+            </div>
+            <div class="prod-stat-card">
+              <div class="stat-label">📈 TỈ LỆ 7 NGÀY</div>
+              <div class="stat-val" id="pdetail-ratio">—</div>
+              <div class="stat-sub" id="pdetail-ratio-sub">Đơn vs Creator</div>
+            </div>
+          </div>
+
+          <div class="field" style="margin-top: 12px;">
+            <label style="font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase;">ID Sản
+              phẩm</label>
+            <div class="row gap">
+              <input type="text" id="pdetail-id" readonly
+                style="font-family: monospace; font-weight: 600; font-size: 13px;">
+              <button type="button" class="btn ghost sm" id="btn-pdetail-copy-id">📋 Copy</button>
+              <button type="button" class="btn primary sm" id="btn-pdetail-paste-phone"
+                title="Copy & Paste thẳng ID này vào ô đang chọn trên điện thoại">📲 Paste vào Phone</button>
+            </div>
+          </div>
+
+          <div class="field" style="margin-top: 8px;">
+            <label style="font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase;">Link
+              TikTok Shop</label>
+            <div class="row gap">
+              <input type="text" id="pdetail-pdp-url" readonly style="font-size: 11.5px;">
+              <a id="pdetail-open-web" href="#" target="_blank" rel="noopener noreferrer" class="btn ghost sm">🌐 Mở
+                Web</a>
+              <button type="button" class="btn ghost sm" id="btn-pdetail-copy-link">📋</button>
+            </div>
+          </div>
+
+          <div id="pdetail-variations-box" style="margin-top: 10px; display: none;">
+            <div
+              style="font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; margin-bottom: 4px;">
+              Phân loại hàng</div>
+            <div class="row gap wrap" id="pdetail-variations-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prod-desc-section" style="margin-top: 16px; border-top: 1px solid var(--line); padding-top: 14px;">
+        <div class="row gap" style="justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h4 style="margin: 0; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+            <span>📝 Mô tả chi tiết sản phẩm</span>
+            <span id="pdetail-desc-badge" class="chip" style="font-size: 10px; font-weight: normal;">Toàn bộ nội
+              dung</span>
+          </h4>
+          <button type="button" class="btn ghost xs" id="btn-pdetail-copy-desc">📋 Copy toàn bộ mô tả</button>
+        </div>
+
+        <div class="prod-desc-content" id="pdetail-desc-text">
+          Chưa có mô tả chi tiết. Hãy bấm nút <i>Tải lại (Cách 1 - SPAI)</i> để cập nhật.
+        </div>
+
+        <div id="pdetail-desc-images-box" style="margin-top: 14px; display: none;">
+          <div class="row gap center" style="justify-content: space-between; margin-bottom: 6px;">
+            <div style="font-size: 12px; font-weight: 600; color: var(--muted);">Ảnh trong phần mô tả:</div>
+            <button type="button" class="btn ghost xs" id="btn-pdetail-copy-desc-images">📋 Copy link ảnh mô tả</button>
+          </div>
+          <div class="prod-desc-images-grid" id="pdetail-desc-images-grid"></div>
+        </div>
+      </div>
+
+      <div class="row end gap" style="margin-top: 16px; padding-top: 10px; border-top: 1px solid var(--line);">
+        <button type="button" class="btn ghost" id="btn-pdetail-close">Đóng</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <script src="/app.js?v=research_phone_v3"></script>
+</body>
+
+</html>
