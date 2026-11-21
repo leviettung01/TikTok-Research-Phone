@@ -926,8 +926,14 @@ $('#chk-auto-paste-id')?.addEventListener('change', (e) => {
   );
 });
 
+function resolveActiveProductId() {
+  const txt = ($('#phone-product-id')?.textContent || '').trim();
+  const domId = /^\d{8,}$/.test(txt) ? txt : '';
+  return state.lastProductId || domId || '';
+}
+
 $('#btn-copy-product-id')?.addEventListener('click', () => {
-  const id = state.lastProductId || '';
+  const id = resolveActiveProductId();
   if (!id) {
     toast('Chưa có ID sản phẩm nào. Hãy kéo thả video có tên chứa ID vào máy hoặc chọn từ bảng Research!', 'warn');
     return;
@@ -936,7 +942,7 @@ $('#btn-copy-product-id')?.addEventListener('click', () => {
 });
 
 $('#btn-paste-product-id')?.addEventListener('click', () => {
-  const id = state.lastProductId || '';
+  const id = resolveActiveProductId();
   if (!id) {
     pastePcClipboardToPhone();
     return;
@@ -1111,6 +1117,7 @@ function uploadSingleVideo(file, index, total) {
 
     const autoPasteParam = state.autoPasteId ? '1' : '0';
     const xhr = new XMLHttpRequest();
+    xhr.timeout = 300000;
     const url = `/api/devices/${enc(state.selected)}/upload-video?filename=${enc(file.name)}&autoPaste=${autoPasteParam}`;
     xhr.open('POST', url, true);
     xhr.setRequestHeader('X-Filename', enc(file.name));
@@ -1155,6 +1162,7 @@ function uploadSingleVideo(file, index, total) {
     };
 
     xhr.onerror = () => resolve({ ok: false, name: file.name, error: 'Mất kết nối tới máy chủ' });
+    xhr.ontimeout = () => resolve({ ok: false, name: file.name, error: 'Quá thời gian truyền video (timeout 5 phút)' });
     xhr.send(file);
   });
 }
@@ -1219,6 +1227,15 @@ async function uploadVideosToPhone(files) {
   }
 }
 
+function filterVideoFiles(fileList) {
+  return Array.from(fileList || []).filter((f) => {
+    if (!f || !f.name) return false;
+    const idx = f.name.lastIndexOf('.');
+    const ext = idx >= 0 ? f.name.slice(idx).toLowerCase() : '';
+    return (f.type && f.type.startsWith('video/')) || ['.mp4', '.mov', '.webm', '.m4v', '.mkv', '.avi'].includes(ext);
+  });
+}
+
 function initPhoneDragDrop() {
   const dropZone = $('#screen-panel') || $('#phone');
   if (!dropZone) return;
@@ -1228,14 +1245,30 @@ function initPhoneDragDrop() {
     hidePhoneDropOverlay(true);
   });
 
-  let dragCounter = 0;
-
-  dropZone.addEventListener('dragenter', (e) => {
-    if (!e.dataTransfer?.types?.includes('Files')) return;
+  // Ngăn Edge/Chrome tự phát video nếu người dùng kéo thả lệch ra ngoài khung điện thoại
+  window.addEventListener('dragover', (e) => {
     e.preventDefault();
-    e.stopPropagation();
-    dragCounter++;
-    if (dragCounter === 1 && !isUploadingVideo) {
+  });
+  window.addEventListener('drop', (e) => {
+    e.preventDefault();
+    if (!isUploadingVideo) hidePhoneDropOverlay();
+    const files = Array.from(e.dataTransfer?.files || []);
+    if (!files.length) return;
+    const videoFiles = filterVideoFiles(files);
+    if (videoFiles.length) {
+      uploadVideosToPhone(videoFiles);
+    } else {
+      toast('Hãy kéo thả file Video (.mp4, .mov, .webm, .m4v, .mkv, .avi) vào khung màn hình điện thoại!', 'warn');
+    }
+  });
+  window.addEventListener('dragend', () => {
+    if (!isUploadingVideo) hidePhoneDropOverlay();
+  });
+
+  const showHoverDrop = (e) => {
+    const types = Array.from(e.dataTransfer?.types || []);
+    const hasFiles = types.length === 0 || types.includes('Files') || types.includes('application/x-moz-file');
+    if (hasFiles && !isUploadingVideo) {
       showPhoneDropOverlay(
         'Thả Video vào Điện Thoại',
         state.autoPasteId
@@ -1244,21 +1277,25 @@ function initPhoneDragDrop() {
         false
       );
     }
+  };
+
+  dropZone.addEventListener('dragenter', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    showHoverDrop(e);
   });
 
   dropZone.addEventListener('dragover', (e) => {
-    if (!e.dataTransfer?.types?.includes('Files')) return;
     e.preventDefault();
     e.stopPropagation();
-    e.dataTransfer.dropEffect = 'copy';
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+    showHoverDrop(e);
   });
 
   dropZone.addEventListener('dragleave', (e) => {
-    if (!e.dataTransfer?.types?.includes('Files')) return;
     e.preventDefault();
     e.stopPropagation();
-    dragCounter = Math.max(0, dragCounter - 1);
-    if (dragCounter === 0 && !isUploadingVideo) {
+    if (!dropZone.contains(e.relatedTarget) && !isUploadingVideo) {
       hidePhoneDropOverlay();
     }
   });
@@ -1266,20 +1303,14 @@ function initPhoneDragDrop() {
   dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
     e.stopPropagation();
-    dragCounter = 0;
 
     const files = Array.from(e.dataTransfer?.files || []);
     if (!files.length) {
-      hidePhoneDropOverlay();
+      if (!isUploadingVideo) hidePhoneDropOverlay();
       return;
     }
 
-    const videoFiles = files.filter((f) => {
-      const idx = f.name.lastIndexOf('.');
-      const ext = idx >= 0 ? f.name.slice(idx).toLowerCase() : '';
-      return f.type.startsWith('video/') || ['.mp4', '.mov', '.webm', '.m4v', '.mkv', '.avi'].includes(ext);
-    });
-
+    const videoFiles = filterVideoFiles(files);
     if (!videoFiles.length) {
       hidePhoneDropOverlay();
       toast('Vui lòng kéo thả file Video (.mp4, .mov, .webm, .m4v, .mkv, .avi)!', 'warn');

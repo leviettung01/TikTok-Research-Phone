@@ -477,19 +477,22 @@ class App:
         except Exception:
             pass
 
-        # 2. Copy vào Phone Clipboard qua scrcpy
+        # 2. Copy vào Phone Clipboard + Paste trực tiếp cực nhanh (< 20ms) qua scrcpy nếu stream sẵn sàng
         copied = False
+        pasted = False
+        paste_method = ""
         try:
             stream = self.streams.get(serial)
             if stream and stream.running and stream.controllable:
-                copied = stream.set_clipboard(pid, paste=False)
+                copied = stream.set_clipboard(pid, paste=bool(paste))
+                if paste and copied:
+                    pasted = True
+                    paste_method = "scrcpy_clipboard_paste"
         except Exception as e:
-            self.log(f"Lưu ý copy clipboard scrcpy: {e}")
+            self.log(f"Lưu ý copy/paste clipboard scrcpy: {e}")
 
-        # 3. Paste trực tiếp vào điện thoại (nếu bật paste=True)
-        pasted = False
-        paste_method = ""
-        if paste:
+        # 3. Dự phòng nếu stream scrcpy chưa sẵn sàng (chế độ Ảnh chụp) và cần Paste
+        if paste and not pasted:
             try:
                 res = self.send_text_to_device(serial, pid)
                 pasted = bool(res.get("ok"))
@@ -536,7 +539,7 @@ class App:
         ext = file_to_push.suffix.lower()
         if ext not in {".mp4", ".mov", ".m4v", ".webm"}:
             ext = ".mp4"
-        base_name = re.sub(r"[^\w\.-]", "_", Path(filename).stem).strip() or "video"
+        base_name = re.sub(r"[^A-Za-z0-9._-]+", "_", Path(filename).stem).strip("._-")[:80] or "video"
         safe_name = f"{base_name}_{int(time.time())}{ext}"
 
         self.adb.shell(serial, "mkdir -p /sdcard/DCIM/Camera", timeout=8, check=False)
@@ -1527,7 +1530,7 @@ class Handler(BaseHTTPRequestHandler):
         config.ensure_runtime_dirs()
         temp_dir = config.WORK_DIR / "uploads"
         temp_dir.mkdir(parents=True, exist_ok=True)
-        safe_prefix = re.sub(r"[^\w\.-]", "_", Path(raw_name).stem) or "upload"
+        safe_prefix = re.sub(r"[^A-Za-z0-9._-]+", "_", Path(raw_name).stem).strip("._-")[:80] or "upload"
         ext = Path(raw_name).suffix.lower()
         if ext not in config.VIDEO_EXTENSIONS:
             ext = ".mp4"
